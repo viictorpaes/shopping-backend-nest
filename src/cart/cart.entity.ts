@@ -7,7 +7,7 @@ export class Cart {
   id: number;
 
   @ManyToOne(() => Product)
-  @JoinColumn({ name: 'idProduto' }) // Define a coluna como idProduto
+  @JoinColumn({ name: 'id' }) // Define a coluna como id
   product: Product;
 
   @Column()

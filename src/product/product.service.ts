@@ -14,10 +14,10 @@ export class ProductService {
     return this.productRepository.find();
   }
 
-  async findOne(idProduto: number): Promise<Product | null> {
-    const updatedProduct = await this.productRepository.findOneBy({ id: idProduto });
+  async findOne(id: number): Promise<Product | null> {
+    const updatedProduct = await this.productRepository.findOneBy({ id });
     if (!updatedProduct) {
-      throw new Error(`Product with idProduto ${idProduto} not found`);
+      throw new Error(`Product with id ${id} not found`);
     }
     return updatedProduct;
   }
@@ -27,31 +27,30 @@ export class ProductService {
     return this.productRepository.save(newProduct);
   }
 
-  async update(idProduto: number, productData: Partial<Product>): Promise<Product> {
-    await this.productRepository.update(idProduto, productData);
-    const product = await this.productRepository.findOneBy({ id: idProduto });
+  async update(id: number, productData: Partial<Product>): Promise<Product> {
+    await this.productRepository.update(id, productData);
+    const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new Error(`Product with idProduto ${idProduto} not found`);
+      throw new Error(`Product with id ${id} not found`);
     }
     return product;
   }
 
-  async remove(idProduto: number): Promise<void> {
-    await this.productRepository.delete(idProduto);
+  async remove(id: number): Promise<void> {
+    await this.productRepository.delete(id);
   }
 
   findByCriteria(criteria: Partial<Product>): Promise<Product[]> {
     const where: FindOptionsWhere<Product> = {};
 
-    // Verifica se os critérios foram enviados e os adiciona ao objeto `where`
     if (criteria.name) {
-      where.name = Like(`%${criteria.name}%`); // Busca parcial por nome
+      where.name = Like(`%${criteria.name}%`);
     }
     if (criteria.price) {
-      where.price = +criteria.price; // Converte o preço para número
+      where.price = +criteria.price;
     }
     if (criteria.description) {
-      where.description = Like(`%${criteria.description}%`); // Busca parcial por descrição
+      where.description = Like(`%${criteria.description}%`);
     }
 
     return this.productRepository.find({ where });

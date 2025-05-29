@@ -11,9 +11,9 @@ export class ProductController {
     return this.productService.findAll();
   }
 
-  @Get(':idProduto')
-  findOne(@Param('idProduto') idProduto: number): Promise<Product | null> {
-    return this.productService.findOne(idProduto);
+  @Get(':id')
+  findOne(@Param('id') id: number): Promise<Product | null> {
+    return this.productService.findOne(id);
   }
 
   @Post()
@@ -21,18 +21,21 @@ export class ProductController {
     return this.productService.create(product);
   }
 
-  @Put(':idProduto')
-  update(@Param('idProduto') idProduto: number, @Body() product: Partial<Product>): Promise<Product> {
-    return this.productService.update(idProduto, product);
+  @Put(':id')
+  update(@Param('id') id: number, @Body() product: Partial<Product>): Promise<Product> {
+    return this.productService.update(id, product);
   }
 
-  @Delete(':idProduto')
-  remove(@Param('idProduto') idProduto: number): Promise<void> {
-    return this.productService.remove(idProduto);
+  @Delete(':id')
+  remove(@Param('id') id: number): Promise<void> {
+    return this.productService.remove(id);
   }
 
   @Get('search')
   findByCriteria(@Query() query: Partial<Product>): Promise<Product[]> {
+    if (!query || Object.keys(query).length === 0) {
+      throw new Error('At least one search criterion must be provided');
+    }
     return this.productService.findByCriteria(query);
   }
 }

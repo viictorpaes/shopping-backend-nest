@@ -11,9 +11,9 @@ export class ProductController {
     return this.productService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number): Promise<Product | null> {
-    return this.productService.findOne(id);
+  @Get(':productId')
+  findOne(@Param('productId') productId: number): Promise<Product | null> {
+    return this.productService.findOne(productId);
   }
 
   @Post()
@@ -21,14 +21,14 @@ export class ProductController {
     return this.productService.create(product);
   }
 
-  @Put(':id')
-  update(@Param('id') id: number, @Body() product: Partial<Product>): Promise<Product> {
-    return this.productService.update(id, product);
+  @Put(':productId')
+  update(@Param('productId') productId: number, @Body() product: Partial<Product>): Promise<Product> {
+    return this.productService.update(productId, product);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: number): Promise<void> {
-    return this.productService.remove(id);
+  @Delete(':productId')
+  async remove(@Param('productId') productId: number): Promise<void> {
+    return this.productService.remove(productId);
   }
 
   @Get('search')

@@ -1,6 +1,25 @@
-import { Controller, Get, Post, Delete, Body, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, BadRequestException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
+import { IsArray, ValidateNested, IsNotEmpty, IsPositive } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class AddProductDto {
+  @IsNotEmpty()
+  @IsPositive()
+  productId: number;
+
+  @IsNotEmpty()
+  @IsPositive()
+  quantity: number;
+}
+
+class AddProductsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AddProductDto)
+  products: AddProductDto[];
+}
 
 @Controller('cart')
 export class CartController {
@@ -12,13 +31,10 @@ export class CartController {
   }
 
   @Post()
-  addProducts(@Body() products: { id: number; quantity: number }[]): Promise<Cart[]> {
-    if (!Array.isArray(products)) {
-      throw new BadRequestException('The request body must be an array of products');
-    }
-
-    const formattedProducts = products.map(product => ({
-      productId: product.id,
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  addProducts(@Body() body: AddProductsDto): Promise<Cart[]> {
+    const formattedProducts = body.products.map(product => ({
+      productId: product.productId,
       quantity: product.quantity,
     }));
     return this.cartService.addProducts(formattedProducts);

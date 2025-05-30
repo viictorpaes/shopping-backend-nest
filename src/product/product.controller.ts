@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
 
@@ -21,11 +21,13 @@ export class ProductController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   create(@Body() product: Partial<Product>): Promise<Product> {
     return this.productService.create(product);
   }
 
   @Put(':productId')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   update(@Param('productId') productId: number, @Body() product: Partial<Product>): Promise<Product> {
     return this.productService.update(productId, product);
   }

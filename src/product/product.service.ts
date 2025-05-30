@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, Like } from 'typeorm';
 import { Product } from './product.entity';
@@ -18,11 +18,11 @@ export class ProductService {
   }
 
   async findOne(productId: number): Promise<Product | null> {
-    const updatedProduct = await this.productRepository.findOneBy({ productId });
-    if (!updatedProduct) {
-      throw new Error(`Product with productId ${productId} not found`);
+    const product = await this.productRepository.findOneBy({ productId });
+    if (!product) {
+      throw new NotFoundException(`Product with productId ${productId} not found`);
     }
-    return updatedProduct;
+    return product;
   }
 
   create(product: Partial<Product>): Promise<Product> {
@@ -52,11 +52,23 @@ export class ProductService {
   findByCriteria(criteria: Partial<Product>): Promise<Product[]> {
     const where: FindOptionsWhere<Product> = {};
 
+    // Adiciona validação para os critérios
+    if (criteria.productId) {
+      const productId = parseInt(criteria.productId as any, 10);
+      if (isNaN(productId) || productId <= 0) {
+        throw new BadRequestException('Invalid productId. It must be a positive number.');
+      }
+      where.productId = productId;
+    }
     if (criteria.name) {
       where.name = Like(`%${criteria.name}%`);
     }
     if (criteria.price) {
-      where.price = +criteria.price;
+      const price = parseFloat(criteria.price as any);
+      if (isNaN(price) || price <= 0) {
+        throw new BadRequestException('Invalid price. It must be a positive number.');
+      }
+      where.price = price;
     }
     if (criteria.description) {
       where.description = Like(`%${criteria.description}%`);

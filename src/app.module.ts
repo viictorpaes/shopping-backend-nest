@@ -14,8 +14,8 @@ import { LogModule } from './logs/log.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, // Desative em produção
     }),
-    ProductModule,
-    CartModule,
+    ProductModule, // Certifique-se de que o módulo de produtos está registrado
+    CartModule,    // Certifique-se de que o módulo de carrinho está registrado
     LogModule,
   ],
 })

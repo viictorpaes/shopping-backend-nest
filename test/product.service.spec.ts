@@ -3,19 +3,18 @@ import { ProductService } from '../src/product/product.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Product } from '../src/product/product.entity';
 import { LogService } from '../src/logs/log.service';
-import { Repository } from 'typeorm';
 
 const mockProductRepository = {
-  find: jest.fn(),
-  findOneBy: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
+  find: jest.fn().mockResolvedValue([]), // Retorna uma lista vazia por padrão
+  findOneBy: jest.fn().mockResolvedValue(null), // Retorna null por padrão
+  create: jest.fn().mockImplementation((product) => product), // Retorna o produto criado
+  save: jest.fn().mockImplementation((product) => ({ id: 1, ...product })), // Retorna o produto salvo com ID
+  update: jest.fn().mockResolvedValue(undefined), // Simula uma atualização bem-sucedida
+  delete: jest.fn().mockResolvedValue(undefined), // Simula uma exclusão bem-sucedida
 };
 
 const mockLogService = {
-  createLog: jest.fn(),
+  createLog: jest.fn().mockResolvedValue(undefined), // Simula a criação de logs
 };
 
 describe('ProductService', () => {

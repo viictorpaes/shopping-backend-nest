@@ -6,15 +6,15 @@ import { Product } from '../src/product/product.entity';
 import { Repository } from 'typeorm';
 
 const mockCartRepository = {
-  find: jest.fn(),
-  findOne: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  delete: jest.fn(),
+  find: jest.fn().mockResolvedValue([]), // Retorna uma lista vazia por padrão
+  findOne: jest.fn().mockResolvedValue(null), // Retorna null por padrão
+  create: jest.fn().mockImplementation((cartItem) => cartItem), // Retorna o item criado
+  save: jest.fn().mockImplementation((cartItem) => ({ id: 1, ...cartItem })), // Retorna o item salvo com ID
+  delete: jest.fn().mockResolvedValue(undefined), // Simula uma exclusão bem-sucedida
 };
 
 const mockProductRepository = {
-  find: jest.fn(),
+  find: jest.fn().mockResolvedValue([]), // Retorna uma lista vazia por padrão
 };
 
 describe('CartService', () => {

@@ -9,14 +9,14 @@ import { LogModule } from './logs/log.module';
   imports: [
     ConfigModule.forRoot(), // Carrega variáveis de ambiente do arquivo .env
     TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: process.env.DATABASE_NAME || 'shopping.db', // Usa a variável DATABASE_NAME
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // Desative em produção
+      type: 'sqlite', // Define o tipo de banco de dados como SQLite
+      database: process.env.DATABASE_NAME || 'shopping.db', // Usa a variável DATABASE_NAME ou o padrão 'shopping.db'
+      entities: [__dirname + '/**/*.entity{.ts,.js}'], // Carrega todas as entidades
+      synchronize: false, // Desative em produção para evitar alterações automáticas no banco
     }),
-    ProductModule, // Certifique-se de que o módulo de produtos está registrado
-    CartModule,    // Certifique-se de que o módulo de carrinho está registrado
-    LogModule,
+    ProductModule, // Módulo responsável pelo gerenciamento de produtos
+    CartModule,    // Módulo responsável pelo gerenciamento do carrinho
+    LogModule,     // Módulo responsável pelo registro de logs
   ],
 })
 export class AppModule {}

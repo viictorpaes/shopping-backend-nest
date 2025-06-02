@@ -64,6 +64,9 @@ export class ProductService {
     if (criteria.description) {
       where.description = Like(`%${criteria.description}%`);
     }
+    if (criteria.discount) {
+      where.discount = criteria.discount; // Filtrar por desconto
+    }
 
     return this.productRepository.find({ where });
   }

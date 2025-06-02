@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsOptional, Min } from 'class-validator';
 
 @Entity('product')
 export class Product {
@@ -21,4 +21,10 @@ export class Product {
   @IsNotEmpty()
   @IsString()
   description: string;
+
+  @Column('decimal', { nullable: true }) // Define a coluna como opcional
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discount?: number; // Desconto opcional (valor mínimo: 0)
 }

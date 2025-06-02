@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UsePipes, ValidationPipe, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UsePipes, ValidationPipe, Logger, NotFoundException, BadRequestException, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
@@ -77,6 +78,26 @@ export class ProductController {
     } catch (error) {
       this.logger.error('Error deleting product', error.stack);
       throw new BadRequestException('An error occurred while deleting the product');
+    }
+  }
+
+  @Post(':id/photos')
+  @UseInterceptors(FilesInterceptor('photos', 10)) // Permite até 10 arquivos
+  async uploadPhotos(
+    @Param('id') id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<Product> {
+    try {
+      const product = await this.productService.findOne(id);
+      if (!product) {
+        throw new BadRequestException('Product not found');
+      }
+
+      const photos = files.map(file => file.path); // Salva os caminhos dos arquivos
+      product.photos = [...(product.photos || []), ...photos];
+      return await this.productService.update(id, { photos: product.photos });
+    } catch (error) {
+      throw new BadRequestException('An error occurred while uploading photos');
     }
   }
 }

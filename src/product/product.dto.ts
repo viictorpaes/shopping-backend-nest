@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString, IsOptional, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsOptional, Min, IsArray } from 'class-validator';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -18,6 +18,11 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   discount?: number; // Desconto opcional
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photos?: string[]; // URLs das fotos
 }
 
 export class UpdateProductDto {
@@ -38,6 +43,11 @@ export class UpdateProductDto {
   @IsNumber()
   @Min(0)
   discount?: number; // Desconto opcional
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photos?: string[]; // URLs das fotos
 }
 
 export class FindByCriteriaDto {

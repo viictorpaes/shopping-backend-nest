@@ -27,4 +27,7 @@ export class Product {
   @IsNumber()
   @Min(0)
   discount?: number; // Desconto opcional (valor mínimo: 0)
+
+  @Column('simple-array', { nullable: true }) // Define a coluna como opcional e aceita múltiplas fotos
+  photos?: string[]; // Array de URLs das fotos
 }

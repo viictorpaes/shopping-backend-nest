@@ -17,10 +17,10 @@ export class ProductService {
     return this.productRepository.find();
   }
 
-  async findOne(productId: number): Promise<Product | null> {
-    const product = await this.productRepository.findOneBy({ productId });
+  async findOne(id: number): Promise<Product | null> {
+    const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new NotFoundException(`Product with productId ${productId} not found`);
+      throw new NotFoundException(`Product with id ${id} not found`);
     }
     return product;
   }
@@ -30,35 +30,34 @@ export class ProductService {
     return this.productRepository.save(newProduct);
   }
 
-  async update(productId: number, productData: Partial<Product>): Promise<Product> {
-    await this.productRepository.update(productId, productData);
-    const product = await this.productRepository.findOneBy({ productId });
+  async update(id: number, productData: Partial<Product>): Promise<Product> {
+    await this.productRepository.update(id, productData);
+    const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new Error(`Product with productId ${productId} not found`);
+      throw new Error(`Product with id ${id} not found`);
     }
     return product;
   }
 
-  async remove(productId: number): Promise<void> {
-    const product = await this.productRepository.findOneBy({ productId });
+  async remove(id: number): Promise<void> {
+    const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new Error(`Product with productId ${productId} not found`);
+      throw new Error(`Product with id ${id} not found`);
     }
 
-    await this.cartRepository.delete({ product: { productId } });
-    await this.productRepository.delete(productId);
+    await this.cartRepository.delete({ product: { id } });
+    await this.productRepository.delete(id);
   }
 
   findByCriteria(criteria: Partial<Product>): Promise<Product[]> {
     const where: FindOptionsWhere<Product> = {};
 
-    // Adiciona validação para os critérios
-    if (criteria.productId) {
-      const productId = parseInt(criteria.productId as any, 10);
-      if (isNaN(productId) || productId <= 0) {
-        throw new BadRequestException('Invalid productId. It must be a positive number.');
+    if (criteria.id) {
+      const id = parseInt(criteria.id as any, 10);
+      if (isNaN(id) || id <= 0) {
+        throw new BadRequestException('Invalid id. It must be a positive number.');
       }
-      where.productId = productId;
+      where.id = id;
     }
     if (criteria.name) {
       where.name = Like(`%${criteria.name}%`);

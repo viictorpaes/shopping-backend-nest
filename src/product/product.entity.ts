@@ -3,8 +3,8 @@ import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
 
 @Entity('product')
 export class Product {
-  @PrimaryGeneratedColumn({ name: 'productId' }) // Define a coluna como productId
-  productId: number;
+  @PrimaryGeneratedColumn() // Define a coluna como id
+  id: number;
 
   @Column()
   @IsNotEmpty()

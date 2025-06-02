@@ -21,7 +21,7 @@ export class CartService {
     const cartItems: Cart[] = [];
 
     for (const { productId, quantity } of products) {
-      const product = await this.productRepository.findOne({ where: { productId } });
+      const product = await this.productRepository.findOne({ where: { id: productId } });
       if (!product) {
         throw new NotFoundException(`Product with productId ${productId} not found`);
       }

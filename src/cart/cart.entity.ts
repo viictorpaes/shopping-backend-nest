@@ -7,7 +7,7 @@ export class Cart {
   id: number;
 
   @ManyToOne(() => Product, { onDelete: 'CASCADE' }) // Configura onDelete para evitar erros de chave estrangeira
-  @JoinColumn({ name: 'productId' }) // Define a coluna como productId
+  @JoinColumn({ name: 'id' }) // Define a coluna como id
   product: Product;
 
   @Column()

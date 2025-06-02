@@ -7,7 +7,7 @@ export class CreateCartTable1680000000001 implements MigrationInterface {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         productId INTEGER NOT NULL,
         quantity INTEGER NOT NULL,
-        FOREIGN KEY (productId) REFERENCES product (productId) ON DELETE CASCADE
+        FOREIGN KEY (productId) REFERENCES product (id) ON DELETE CASCADE
       )
     `);
   }

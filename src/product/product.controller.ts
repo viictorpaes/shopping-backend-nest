@@ -15,18 +15,18 @@ export class ProductController {
     return this.productService.findAll();
   }
 
-  @Get(':productId')
+  @Get(':id')
   @ApiOperation({ summary: 'Buscar um produto pelo ID' })
-  @ApiParam({ name: 'productId', type: Number, description: 'ID do produto' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
   @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
   @ApiResponse({ status: 400, description: 'ID do produto inválido.' })
-  async findOne(@Param('productId') productId: string): Promise<Product | null> {
+  async findOne(@Param('id') id: string): Promise<Product | null> {
     try {
-      const id = parseInt(productId, 10);
-      if (isNaN(id) || id <= 0) {
-        throw new BadRequestException('Invalid productId. It must be a positive number.');
+      const parsedId = parseInt(id, 10);
+      if (isNaN(parsedId) || parsedId <= 0) {
+        throw new BadRequestException('Invalid id. It must be a positive number.');
       }
-      return await this.productService.findOne(id);
+      return await this.productService.findOne(parsedId);
     } catch (error) {
       throw new InternalServerErrorException('Error fetching product');
     }
@@ -44,26 +44,26 @@ export class ProductController {
     }
   }
 
-  @Put(':productId')
+  @Put(':id')
   @ApiOperation({ summary: 'Atualizar um produto pelo ID' })
-  @ApiParam({ name: 'productId', type: Number, description: 'ID do produto' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
   @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso.' })
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async update(@Param('productId') productId: number, @Body() product: Partial<Product>): Promise<Product> {
+  async update(@Param('id') id: number, @Body() product: Partial<Product>): Promise<Product> {
     try {
-      return await this.productService.update(productId, product);
+      return await this.productService.update(id, product);
     } catch (error) {
       throw new InternalServerErrorException('Error updating product');
     }
   }
 
-  @Delete(':productId')
+  @Delete(':id')
   @ApiOperation({ summary: 'Remover um produto pelo ID' })
-  @ApiParam({ name: 'productId', type: Number, description: 'ID do produto' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
   @ApiResponse({ status: 200, description: 'Produto removido com sucesso.' })
-  async remove(@Param('productId') productId: number): Promise<void> {
+  async remove(@Param('id') id: number): Promise<void> {
     try {
-      await this.productService.remove(productId);
+      await this.productService.remove(id);
     } catch (error) {
       throw new InternalServerErrorException('Error deleting product');
     }
@@ -71,7 +71,7 @@ export class ProductController {
 
   @Get('search')
   @ApiOperation({ summary: 'Buscar produtos por critérios' })
-  @ApiQuery({ name: 'productId', required: false, type: Number, description: 'ID do produto' })
+  @ApiQuery({ name: 'id', required: false, type: Number, description: 'ID do produto' })
   @ApiQuery({ name: 'name', required: false, type: String, description: 'Nome do produto' })
   @ApiQuery({ name: 'price', required: false, type: Number, description: 'Preço do produto' })
   @ApiQuery({ name: 'description', required: false, type: String, description: 'Descrição do produto' })
@@ -82,7 +82,7 @@ export class ProductController {
         throw new BadRequestException('At least one search criterion must be provided');
       }
 
-      const validKeys = ['productId', 'name', 'price', 'description'];
+      const validKeys = ['id', 'name', 'price', 'description'];
       const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
       if (invalidKeys.length > 0) {
         throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);

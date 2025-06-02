@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
@@ -32,7 +32,12 @@ export class ProductController {
         if (invalidKeys.length > 0) {
           throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);
         }
-        return await this.productService.findByCriteria(query);
+
+        const products = await this.productService.findByCriteria(query);
+        if (products.length === 0) {
+          throw new NotFoundException('No products found matching the criteria');
+        }
+        return products;
       } else {
         return await this.productService.findAll();
       }

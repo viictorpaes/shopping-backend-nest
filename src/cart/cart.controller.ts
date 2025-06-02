@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UsePipes, ValidationPipe, InternalServerErrorException, Logger, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UsePipes, ValidationPipe, InternalServerErrorException, Logger, ParseIntPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
 import { IsArray, ValidateNested, IsNotEmpty, IsPositive } from 'class-validator';
@@ -19,6 +19,12 @@ class AddProductsDto {
   @ValidateNested({ each: true })
   @Type(() => AddProductDto)
   products: AddProductDto[];
+}
+
+class UpdateCartQuantityDto {
+  @IsNotEmpty()
+  @IsPositive()
+  quantity: number;
 }
 
 @Controller('cart')
@@ -48,20 +54,42 @@ export class CartController {
   }
 
   @Delete(':id')
-  async removeProduct(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async removeProduct(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('productId', ParseIntPipe) productId: number,
+  ): Promise<void> {
     try {
+      const exists = await this.cartService.findCartItem(id, productId);
+      if (!exists) {
+        throw new InternalServerErrorException('Cart item not found');
+      }
       await this.cartService.removeProduct(id);
     } catch (error) {
       throw new InternalServerErrorException('An error occurred');
     }
   }
 
-  @Post('checkout')
-  async checkout(): Promise<void> {
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async updateQuantity(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('productId', ParseIntPipe) productId: number,
+    @Body() updateCartQuantityDto: UpdateCartQuantityDto,
+  ): Promise<Cart> {
     try {
-      await this.cartService.checkout();
+      return await this.cartService.updateQuantity(id, productId, updateCartQuantityDto.quantity);
     } catch (error) {
-      throw new InternalServerErrorException('An error occurred');
+      this.logger.error('Error updating cart item quantity', error.stack);
+      throw new InternalServerErrorException('An error occurred while updating cart item quantity');
+    }
+  }
+
+  @Post('checkout/:id')
+  async checkout(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    try {
+      await this.cartService.checkout(id);
+    } catch (error) {
+      throw new InternalServerErrorException('An error occurred during checkout');
     }
   }
 }

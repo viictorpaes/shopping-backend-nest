@@ -20,6 +20,13 @@ export class CartService {
     return this.cartRepository.find({ relations: ['product'] });
   }
 
+  async findCartItem(cartId: number, productId: number): Promise<Cart | null> {
+    return this.cartRepository.findOne({
+      where: { id: cartId, product: { id: productId } },
+      relations: ['product'],
+    });
+  }
+
   async addProducts(products: { productId: number; quantity: number }[]): Promise<Cart[]> {
     const productIds = products.map(p => p.productId);
 
@@ -55,6 +62,16 @@ export class CartService {
     }
   }
 
+  async updateQuantity(cartId: number, productId: number, quantity: number): Promise<Cart> {
+    const cartItem = await this.findCartItem(cartId, productId);
+    if (!cartItem) {
+      throw new NotFoundException('Cart item not found');
+    }
+
+    cartItem.quantity = quantity;
+    return this.cartRepository.save(cartItem);
+  }
+
   async removeProduct(id: number): Promise<void> {
     const cartItem = await this.cartRepository.findOneBy({ id });
     if (!cartItem) {
@@ -63,7 +80,12 @@ export class CartService {
     await this.cartRepository.delete(id);
   }
 
-  async checkout(): Promise<void> {
-    await this.cartRepository.clear();
+  async checkout(cartId: number): Promise<void> {
+    const cartItems = await this.cartRepository.find({ where: { id: cartId } });
+    if (cartItems.length === 0) {
+      throw new NotFoundException('Cart not found or empty');
+    }
+
+    await this.cartRepository.delete({ id: cartId }); // Remove apenas os itens do carrinho específico
   }
 }

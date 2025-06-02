@@ -62,6 +62,7 @@ export class ProductService {
       where.price = LessThanOrEqual(criteria.priceLte); // Preço menor ou igual
     }
     if (criteria.description) {
+      where.description = Like(`%${criteria.description}%`);
     }
 
     return this.productRepository.find({ where });

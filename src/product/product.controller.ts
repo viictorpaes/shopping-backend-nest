@@ -25,7 +25,7 @@ export class ProductController {
   async findAll(@Query() query: FindByCriteriaDto): Promise<Product[]> {
     try {
       if (query && Object.keys(query).length > 0) {
-        const validKeys = ['name', 'price', 'description']; // Removido 'id'
+        const validKeys = ['name', 'price', 'description'];
         const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
         if (invalidKeys.length > 0) {
           throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);

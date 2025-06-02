@@ -29,3 +29,18 @@ export class UpdateProductDto {
   @IsString()
   description?: string;
 }
+
+export class FindByCriteriaDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  price?: number;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}

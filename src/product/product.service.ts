@@ -52,13 +52,7 @@ export class ProductService {
   findByCriteria(criteria: Partial<Product>): Promise<Product[]> {
     const where: FindOptionsWhere<Product> = {};
 
-    if (criteria.id) {
-      const id = parseInt(criteria.id as any, 10);
-      if (isNaN(id) || id <= 0) {
-        throw new BadRequestException('Invalid search criteria');
-      }
-      where.id = id;
-    }
+    
     if (criteria.name) {
       where.name = Like(`%${criteria.name}%`);
     }

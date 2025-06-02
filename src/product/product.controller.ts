@@ -3,6 +3,12 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
 
+class FindByCriteriaDto {
+  name?: string;
+  price?: number;
+  description?: string;
+}
+
 @ApiTags('Products') // Define a tag para o grupo de rotas
 @Controller('products')
 export class ProductController {
@@ -10,22 +16,23 @@ export class ProductController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os produtos ou buscar por critérios' })
-  @ApiQuery({ name: 'id', required: false, type: Number, description: 'ID do produto' })
   @ApiQuery({ name: 'name', required: false, type: String, description: 'Nome do produto' })
   @ApiQuery({ name: 'price', required: false, type: Number, description: 'Preço do produto' })
   @ApiQuery({ name: 'description', required: false, type: String, description: 'Descrição do produto' })
   @ApiResponse({ status: 200, description: 'Produtos encontrados com sucesso.' })
-  async findAll(@Query() query: Partial<Product>): Promise<Product[]> {
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async findAll(@Query() query: FindByCriteriaDto): Promise<Product[]> {
     try {
       if (query && Object.keys(query).length > 0) {
-        const validKeys = ['id', 'name', 'price', 'description'];
+        const validKeys = ['name', 'price', 'description']; // Removido 'id'
         const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
         if (invalidKeys.length > 0) {
           throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);
         }
         return await this.productService.findByCriteria(query);
+      } else {
+        return await this.productService.findAll();
       }
-      return await this.productService.findAll();
     } catch (error) {
       throw new InternalServerErrorException('Error fetching products');
     }

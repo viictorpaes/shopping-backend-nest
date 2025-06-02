@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestExcep
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
+import { CreateProductDto, UpdateProductDto } from './product.dto';
 
 class FindByCriteriaDto {
   name?: string;
@@ -58,9 +59,9 @@ export class ProductController {
   @ApiOperation({ summary: 'Criar um novo produto' })
   @ApiResponse({ status: 201, description: 'Produto criado com sucesso.' })
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async create(@Body() product: Partial<Product>): Promise<Product> {
+  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     try {
-      return await this.productService.create(product);
+      return await this.productService.create(createProductDto);
     } catch (error) {
       throw new InternalServerErrorException('Error creating product');
     }
@@ -71,9 +72,9 @@ export class ProductController {
   @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
   @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso.' })
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async update(@Param('id') id: number, @Body() product: Partial<Product>): Promise<Product> {
+  async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto): Promise<Product> {
     try {
-      return await this.productService.update(id, product);
+      return await this.productService.update(id, updateProductDto);
     } catch (error) {
       throw new InternalServerErrorException('Error updating product');
     }

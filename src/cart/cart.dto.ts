@@ -15,7 +15,7 @@ export class AddProductsDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => AddProductDto)
-  products: AddProductDto[];
+  products: AddProductDto[]; // Lista de produtos a serem adicionados
 }
 
 export class UpdateCartQuantityDto {

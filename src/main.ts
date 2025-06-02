@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { AppDataSource } from './data-source'; // Importa o AppDataSource
-import multer from 'multer';
+import * as multer from 'multer'; // Corrige a importação do multer
 
 async function bootstrap() {
   // Inicializa o AppDataSource e executa as migrations

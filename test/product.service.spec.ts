@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductService } from '../src/product/product.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Product } from '../src/product/product.entity';
+import { Cart } from '../src/cart/cart.entity';
 import { LogService } from '../src/logs/log.service';
 
 const mockProductRepository = {
@@ -11,6 +12,11 @@ const mockProductRepository = {
   save: jest.fn().mockImplementation((product) => ({ id: 1, ...product })), // Retorna o produto salvo com ID
   update: jest.fn().mockResolvedValue(undefined), // Simula uma atualização bem-sucedida
   delete: jest.fn().mockResolvedValue(undefined), // Simula uma exclusão bem-sucedida
+};
+
+const mockCartRepository = {
+  find: jest.fn().mockResolvedValue([]), // Retorna uma lista vazia por padrão
+  findOneBy: jest.fn().mockResolvedValue(null), // Retorna null por padrão
 };
 
 const mockLogService = {
@@ -25,6 +31,7 @@ describe('ProductService', () => {
       providers: [
         ProductService,
         { provide: getRepositoryToken(Product), useValue: mockProductRepository },
+        { provide: getRepositoryToken(Cart), useValue: mockCartRepository },
         { provide: LogService, useValue: mockLogService },
       ],
     }).compile();

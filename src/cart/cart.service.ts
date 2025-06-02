@@ -56,7 +56,7 @@ export class CartService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error('Error adding products to cart', error.stack);
-      throw new Error('An error occurred while adding products to the cart');
+      throw error; // Repassa a exceção original
     } finally {
       await queryRunner.release();
     }
@@ -72,12 +72,12 @@ export class CartService {
     return this.cartRepository.save(cartItem);
   }
 
-  async removeProduct(id: number): Promise<void> {
-    const cartItem = await this.cartRepository.findOneBy({ id });
+  async removeProduct(cartItemId: number): Promise<void> {
+    const cartItem = await this.cartRepository.findOneBy({ id: cartItemId });
     if (!cartItem) {
       throw new NotFoundException('Cart item not found');
     }
-    await this.cartRepository.delete(id);
+    await this.cartRepository.delete(cartItemId);
   }
 
   async checkout(cartId: number): Promise<void> {

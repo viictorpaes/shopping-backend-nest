@@ -23,7 +23,7 @@ export class CartController {
 
   @Post()
   @CartSwagger.addProducts()
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })) // Garante que apenas propriedades esperadas sejam aceitas
   async addProducts(@Body() body: AddProductsDto): Promise<Cart[]> {
     try {
       return await this.cartService.addProducts(body.products);
@@ -35,17 +35,17 @@ export class CartController {
 
   @Delete(':id')
   @CartSwagger.removeProduct()
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })) // Garante que apenas propriedades esperadas sejam aceitas
   async removeProduct(
     @Param('id', ParseIntPipe) id: number,
-    @Query() query: RemoveProductDto,
+    @Query('productId', ParseIntPipe) productId: number, // Valida productId como número positivo
   ): Promise<void> {
     try {
-      const exists = await this.cartService.findCartItem(id, query.productId);
-      if (!exists) {
-        throw new NotFoundException('Cart item not found');
+      const cartItem = await this.cartService.findCartItem(id, productId);
+      if (!cartItem) {
+        throw new NotFoundException(`Cart item with ID ${id} and product ID ${productId} not found`);
       }
-      await this.cartService.removeProduct(id);
+      await this.cartService.removeProduct(cartItem.id); // Passa o ID do item do carrinho
     } catch (error) {
       this.logger.error('Error removing product from cart', error.stack);
       throw new BadRequestException('An error occurred while removing product from the cart');

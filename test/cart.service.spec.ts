@@ -3,7 +3,8 @@ import { CartService } from '../src/cart/cart.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Cart } from '../src/cart/cart.entity';
 import { Product } from '../src/product/product.entity';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { NotFoundException } from '@nestjs/common';
 
 const mockCartRepository = {
   find: jest.fn().mockResolvedValue([]), // Retorna uma lista vazia por padrão
@@ -17,6 +18,20 @@ const mockProductRepository = {
   find: jest.fn().mockResolvedValue([]), // Retorna uma lista vazia por padrão
 };
 
+const mockDataSource = {
+  createQueryRunner: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    startTransaction: jest.fn(),
+    commitTransaction: jest.fn(),
+    rollbackTransaction: jest.fn(),
+    release: jest.fn(),
+    manager: {
+      find: jest.fn().mockResolvedValue([]),
+      save: jest.fn().mockResolvedValue({}),
+    },
+  }),
+};
+
 describe('CartService', () => {
   let service: CartService;
 
@@ -26,6 +41,7 @@ describe('CartService', () => {
         CartService,
         { provide: getRepositoryToken(Cart), useValue: mockCartRepository },
         { provide: getRepositoryToken(Product), useValue: mockProductRepository },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 
@@ -65,6 +81,7 @@ describe('CartService', () => {
     it('should throw NotFoundException if products not found', async () => {
       mockProductRepository.find.mockResolvedValue([]);
 
+      await expect(service.addProducts([{ productId: 1, quantity: 2 }])).rejects.toThrow(NotFoundException);
       await expect(service.addProducts([{ productId: 1, quantity: 2 }])).rejects.toThrow('One or more products not found');
     });
   });

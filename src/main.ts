@@ -2,9 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/http-exception.filter';
-import * as multer from 'multer';
+import { AppDataSource } from './data-source'; // Importa o AppDataSource
+import multer from 'multer';
 
 async function bootstrap() {
+  // Inicializa o AppDataSource e executa as migrations
+  await AppDataSource.initialize()
+    .then(() => console.log('Data Source has been initialized and migrations executed'))
+    .catch((err) => {
+      console.error('Error during Data Source initialization', err);
+      process.exit(1);
+    });
+
   const app = await NestFactory.create(AppModule);
 
   // Configuração do Swagger

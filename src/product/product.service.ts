@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, Like, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
 import { Cart } from '../cart/cart.entity';
+import { LogService } from '../logs/log.service';
 
 @Injectable()
 export class ProductService {
@@ -11,6 +12,7 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(Cart)
     private readonly cartRepository: Repository<Cart>, 
+    private readonly logService: LogService, // Adicionado para registrar logs
   ) {}
 
   findAll(): Promise<Product[]> {
@@ -25,9 +27,11 @@ export class ProductService {
     return product;
   }
 
-  create(product: Partial<Product>): Promise<Product> {
+  async create(product: Partial<Product>): Promise<Product> {
     const newProduct = this.productRepository.create(product);
-    return this.productRepository.save(newProduct);
+    const savedProduct = await this.productRepository.save(newProduct);
+    await this.logService.createLog('CREATE_PRODUCT', `Produto criado com ID ${savedProduct.id}`);
+    return savedProduct;
   }
 
   async update(id: number, productData: Partial<Product>): Promise<Product> {
@@ -36,6 +40,7 @@ export class ProductService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
+    await this.logService.createLog('UPDATE_PRODUCT', `Produto atualizado com ID ${id}`);
     return product;
   }
 
@@ -45,8 +50,8 @@ export class ProductService {
       throw new NotFoundException('Product not found');
     }
 
-    // Apenas remove o produto, ON DELETE CASCADE cuidará dos itens relacionados no carrinho
     await this.productRepository.delete(id);
+    await this.logService.createLog('DELETE_PRODUCT', `Produto removido com ID ${id}`);
   }
 
   findByCriteria(criteria: Partial<Product> & { priceGte?: number; priceLte?: number }): Promise<Product[]> {

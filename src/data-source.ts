@@ -7,4 +7,5 @@ export const AppDataSource = new DataSource({
   entities: [__dirname + '/**/*.entity{.ts,.js}'], // Certifique-se de que as entidades estão sendo carregadas corretamente
   migrations: [__dirname + '/migrations/*{.ts,.js}'], // Certifique-se de que as migrations estão sendo carregadas corretamente
   synchronize: false, // Desative em produção
+  migrationsRun: true, // Executa as migrations automaticamente ao inicializar
 });

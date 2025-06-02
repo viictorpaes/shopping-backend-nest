@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, BadRequestException, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
 import { IsArray, ValidateNested, IsNotEmpty, IsPositive } from 'class-validator';
@@ -32,21 +32,33 @@ export class CartController {
 
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  addProducts(@Body() body: AddProductsDto): Promise<Cart[]> {
-    const formattedProducts = body.products.map(product => ({
-      productId: product.productId,
-      quantity: product.quantity,
-    }));
-    return this.cartService.addProducts(formattedProducts);
+  async addProducts(@Body() body: AddProductsDto): Promise<Cart[]> {
+    try {
+      const formattedProducts = body.products.map(product => ({
+        productId: product.productId,
+        quantity: product.quantity,
+      }));
+      return await this.cartService.addProducts(formattedProducts);
+    } catch (error) {
+      throw new InternalServerErrorException('Error adding products to cart');
+    }
   }
 
   @Delete(':id')
-  removeProduct(@Param('id') id: number): Promise<void> {
-    return this.cartService.removeProduct(id);
+  async removeProduct(@Param('id') id: number): Promise<void> {
+    try {
+      await this.cartService.removeProduct(id);
+    } catch (error) {
+      throw new InternalServerErrorException('Error removing product from cart');
+    }
   }
 
   @Post('checkout')
-  checkout(): Promise<void> {
-    return this.cartService.checkout();
+  async checkout(): Promise<void> {
+    try {
+      await this.cartService.checkout();
+    } catch (error) {
+      throw new InternalServerErrorException('Error during checkout');
+    }
   }
 }

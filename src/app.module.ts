@@ -18,5 +18,7 @@ import { LogModule } from './logs/log.module';
     CartModule,    // Módulo responsável pelo gerenciamento do carrinho
     LogModule,     // Módulo responsável pelo registro de logs
   ],
+  controllers: [], 
+  providers: [],
 })
 export class AppModule {}

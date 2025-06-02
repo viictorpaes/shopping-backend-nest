@@ -26,8 +26,8 @@ const mockDataSource = {
     rollbackTransaction: jest.fn(),
     release: jest.fn(),
     manager: {
-      find: jest.fn().mockResolvedValue([]),
-      save: jest.fn().mockResolvedValue({}),
+      find: jest.fn().mockResolvedValue([]), // Simula busca de produtos
+      save: jest.fn().mockResolvedValue({}), // Simula salvamento de itens no carrinho
     },
   }),
 };
@@ -68,18 +68,22 @@ describe('CartService', () => {
       const products = [{ productId: 1, quantity: 2 }];
       const foundProducts = [{ id: 1, name: 'Product 1' }];
       const cartItem = { id: 1, product: foundProducts[0], quantity: 2 };
-      mockProductRepository.find.mockResolvedValue(foundProducts);
-      mockCartRepository.create.mockReturnValue(cartItem);
-      mockCartRepository.save.mockResolvedValue(cartItem);
+
+      // Configura os mocks para simular o comportamento esperado
+      mockDataSource.createQueryRunner().manager.find.mockResolvedValue(foundProducts);
+      mockDataSource.createQueryRunner().manager.save.mockResolvedValue(cartItem);
 
       const result = await service.addProducts(products);
       expect(result).toEqual([cartItem]);
-      expect(mockProductRepository.find).toHaveBeenCalledWith({ where: { id: [1] } });
-      expect(mockCartRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockDataSource.createQueryRunner().manager.find).toHaveBeenCalledWith(Product, {
+        where: { id: [1] },
+      });
+      expect(mockDataSource.createQueryRunner().manager.save).toHaveBeenCalledTimes(1);
     });
 
     it('should throw NotFoundException if products not found', async () => {
-      mockProductRepository.find.mockResolvedValue([]);
+      // Configura o mock para simular que nenhum produto foi encontrado
+      mockDataSource.createQueryRunner().manager.find.mockResolvedValue([]);
 
       await expect(service.addProducts([{ productId: 1, quantity: 2 }])).rejects.toThrow(NotFoundException);
       await expect(service.addProducts([{ productId: 1, quantity: 2 }])).rejects.toThrow('One or more products not found');

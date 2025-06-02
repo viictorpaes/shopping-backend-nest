@@ -1,136 +1,251 @@
 # Shopping Backend
 
-Este é o backend para gerenciar produtos e carrinho de compras. Ele foi desenvolvido usando NestJS e SQLite.
+## Descrição
+Este é o backend para um sistema de gerenciamento de produtos e carrinho de compras. Ele foi desenvolvido utilizando **NestJS** e **TypeORM** com banco de dados SQLite.
 
-## Pré-requisitos
+## Funcionalidades
+- **Gerenciamento de Produtos**:
+  - Criar, atualizar, listar e remover produtos.
+  - Upload de fotos para produtos.
+  - Busca por critérios como nome, preço e descrição.
+- **Gerenciamento de Carrinho**:
+  - Adicionar produtos ao carrinho.
+  - Atualizar a quantidade de produtos no carrinho.
+  - Remover produtos do carrinho.
+  - Finalizar o carrinho (checkout).
+- **Logs**:
+  - Registro de ações realizadas no sistema, como criação, atualização e exclusão de produtos e itens do carrinho.
 
-Certifique-se de ter instalado:
-- Node.js (versão 16 ou superior)
-- NPM (gerenciador de pacotes do Node.js)
+## Requisitos
+- **Node.js**: Versão `18.16.0` (definida no arquivo `.nvmrc`).
+- **Banco de Dados**: SQLite.
 
 ## Instalação
-
 1. Clone o repositório:
    ```bash
-   git clone <url-do-repositorio>
-   ```
-
-2. Navegue até o diretório do projeto:
-   ```bash
+   git clone https://github.com/viictorpaes/shopping-backend-nest.git
    cd shopping-backend
    ```
 
-3. Instale as dependências:
+2. Instale as dependências:
    ```bash
    npm install
    ```
 
-## Rodando o Projeto
+3. Configure o ambiente:
+   - Crie um arquivo `.env` baseado no `.env.example`:
+     ```dotenv
+     PORT=3000
+     DATABASE_NAME=shopping.db
+     ```
 
-1. Execute as migrations para configurar o banco de dados:
+4. Execute as migrations:
    ```bash
    npm run typeorm migration:run
    ```
 
-2. Inicie o servidor em modo de desenvolvimento:
+## Uso
+1. Inicie o servidor:
    ```bash
    npm run start:dev
    ```
 
-3. Acesse o Swagger para explorar a API:
+2. Acesse a documentação da API:
    - URL: [http://localhost:3000/api](http://localhost:3000/api)
 
-## Rotas Disponíveis
+## Testes
+1. Execute os testes unitários:
+   ```bash
+   npm run test
+   ```
 
-### Produtos
+2. Execute os testes de cobertura:
+   ```bash
+   npm run test:cov
+   ```
 
-#### **Listar todos os produtos**
-- **URL**: `GET /products`
-- **Descrição**: Retorna todos os produtos cadastrados.
+3. Execute os testes end-to-end:
+   ```bash
+   npm run test:e2e
+   ```
 
-#### **Buscar um produto pelo ID**
-- **URL**: `GET /products/:productId`
-- **Descrição**: Retorna um produto específico pelo ID.
-- **Exemplo**:
-  ```bash
-  curl http://localhost:3000/products/1
-  ```
+## Rotas e Exemplos
 
-#### **Criar um novo produto**
-- **URL**: `POST /products`
-- **Descrição**: Cria um novo produto.
-- **Corpo**:
-  ```json
-  {
-    "name": "Produto 1",
-    "price": 100,
-    "description": "Descrição Produto 1"
-  }
-  ```
+### **Produtos**
+#### **GET /products**
+Lista todos os produtos ou busca por critérios.
 
-#### **Atualizar um produto pelo ID**
-- **URL**: `PUT /products/:productId`
-- **Descrição**: Atualiza um produto específico pelo ID.
-- **Corpo**:
-  ```json
-  {
-    "name": "Produto Atualizado",
-    "price": 120,
-    "description": "Descrição Atualizada"
-  }
-  ```
-
-#### **Remover um produto pelo ID**
-- **URL**: `DELETE /products/:productId`
-- **Descrição**: Remove um produto específico pelo ID.
-
-#### **Buscar produtos por critérios**
-- **URL**: `GET /products/search`
-- **Descrição**: Busca produtos com base em critérios.
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/products`
 - **Query Params**:
-  - `productId` (opcional)
-  - `name` (opcional)
-  - `price` (opcional)
-  - `description` (opcional)
-- **Exemplo**:
-  ```bash
-  curl "http://localhost:3000/products/search?name=Produto&price=100"
+  ```json
+  {
+    "name": "camisa",
+    "priceGte": 50,
+    "priceLte": 200,
+    "description": "camisa"
+  }
   ```
+
+#### **GET /products/:id**
+Busca um produto pelo ID.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/products/1`
+
+#### **POST /products**
+Cria um novo produto.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/products`
+- **Body**:
+  ```json
+  {
+    "name": "camisa 2",
+    "price": 100,
+    "description": "camisa camisa a",
+    "discount": 10,
+    "photos": ["http://example.com/photo1.jpg", "http://example.com/photo2.jpg"]
+  }
+  ```
+
+#### **PUT /products/:id**
+Atualiza um produto pelo ID.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/products/1`
+- **Body**:
+  ```json
+  {
+    "name": "camisa atualizada",
+    "price": 120
+  }
+  ```
+
+#### **DELETE /products/:id**
+Remove um produto pelo ID.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/products/1`
+
+#### **POST /products/:id/photos**
+Faz upload de fotos para um produto.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/products/1/photos`
+- **Body**:
+  - Envie os arquivos no campo `photos` como `form-data`.
 
 ---
 
-### Carrinho
+### **Carrinho**
+#### **GET /cart**
+Lista todos os itens do carrinho.
 
-#### **Listar todos os itens do carrinho**
-- **URL**: `GET /cart`
-- **Descrição**: Retorna todos os itens do carrinho.
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/cart`
 
-#### **Adicionar produtos ao carrinho**
-- **URL**: `POST /cart`
-- **Descrição**: Adiciona múltiplos produtos ao carrinho.
-- **Corpo**:
+#### **POST /cart**
+Adiciona produtos ao carrinho.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/cart`
+- **Body**:
   ```json
   {
     "products": [
-      { "productId": 1, "quantity": 2 },
-      { "productId": 2, "quantity": 3 }
+      { "productId": 2, "quantity": 3 },
+      { "productId": 3, "quantity": 1 }
     ]
   }
   ```
 
-#### **Remover um produto do carrinho**
-- **URL**: `DELETE /cart/:id`
-- **Descrição**: Remove um item específico do carrinho pelo ID.
+#### **DELETE /cart/:id**
+Remove um produto do carrinho.
 
-#### **Finalizar compra**
-- **URL**: `POST /cart/checkout`
-- **Descrição**: Limpa todos os itens do carrinho.
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/cart/4?productId=2`
+
+#### **PATCH /cart/:id**
+Atualiza a quantidade de um produto no carrinho.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/cart/4?productId=2`
+- **Body**:
+  ```json
+  {
+    "quantity": 5
+  }
+  ```
+
+#### **POST /cart/checkout/:id**
+Finaliza o carrinho.
+
+**Exemplo no Insomnia**:
+- **URL**: `http://localhost:3000/cart/checkout/4`
 
 ---
 
-## Observações
+## Regras de Negócio
+### Produtos
+- **Criação**:
+  - Um produto deve conter `name`, `price` e `description`.
+  - O campo `discount` é opcional e deve ser maior ou igual a 0.
+  - O campo `photos` aceita múltiplas URLs de imagens.
 
-- Certifique-se de que o banco de dados SQLite (`shopping.db`) foi criado corretamente após executar as migrations.
-- Use o Swagger para explorar e testar as rotas: [http://localhost:3000/api](http://localhost:3000/api).
+- **Busca**:
+  - É possível buscar produtos por critérios como `name`, `priceGte`, `priceLte` e `description`.
 
-Se encontrar algum problema, entre em contato ou abra uma issue no repositório.
+- **Upload de Fotos**:
+  - Até 10 fotos podem ser enviadas por produto.
+  - As fotos são armazenadas no diretório `./uploads`.
+
+### Carrinho
+- **Adição de Produtos**:
+  - Produtos são adicionados ao carrinho com `productId` e `quantity`.
+  - Caso o produto não exista, uma exceção será lançada.
+
+- **Atualização de Quantidade**:
+  - A quantidade de um produto no carrinho pode ser atualizada.
+  - Caso o item não exista, uma exceção será lançada.
+
+- **Remoção de Produtos**:
+  - Produtos podem ser removidos do carrinho utilizando o `id` do carrinho e o `productId`.
+
+- **Checkout**:
+  - Finaliza o carrinho removendo todos os itens associados ao `id` do carrinho.
+
+### Logs
+- Todas as ações realizadas no sistema são registradas no banco de dados:
+  - Exemplo: `CREATE_PRODUCT`, `DELETE_CART_ITEM`.
+
+---
+
+## Estrutura do Projeto
+- **src**:
+  - `product`: Gerenciamento de produtos.
+  - `cart`: Gerenciamento de carrinho.
+  - `logs`: Registro de ações realizadas.
+  - `common`: Filtros globais e utilitários.
+  - `migrations`: Scripts para criação e alteração de tabelas no banco de dados.
+
+## Contribuição
+1. Crie um branch para sua feature:
+   ```bash
+   git checkout -b minha-feature
+   ```
+
+2. Faça suas alterações e commit:
+   ```bash
+   git commit -m "Adiciona minha feature"
+   ```
+
+3. Envie o branch para o repositório remoto:
+   ```bash
+   git push origin minha-feature
+   ```
+
+4. Abra um Pull Request.
+
+## Licença
+Este projeto está sob a licença **Victor Paes**.

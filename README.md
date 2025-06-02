@@ -68,7 +68,52 @@ Este é o backend para um sistema de gerenciamento de produtos e carrinho de com
    ```bash
    npm run test:e2e
    ```
+## Testando no Swagger
 
+O Swagger é uma interface gráfica que permite testar as rotas da API diretamente no navegador.
+
+1. **Acesse o Swagger**:
+   - URL: [http://localhost:3000/api](http://localhost:3000/api)
+
+2. **Rotas disponíveis**:
+   - **Produtos**:
+     - `GET /products`: Lista todos os produtos ou busca por critérios.
+     - `GET /products/:id`: Busca um produto pelo ID.
+     - `POST /products`: Cria um novo produto.
+     - `PUT /products/:id`: Atualiza um produto pelo ID.
+     - `DELETE /products/:id`: Remove um produto pelo ID.
+     - `POST /products/:id/photos`: Faz upload de fotos para um produto.
+   - **Carrinho**:
+     - `GET /cart`: Lista todos os itens do carrinho.
+     - `POST /cart`: Adiciona produtos ao carrinho.
+     - `DELETE /cart/:id`: Remove um produto do carrinho.
+     - `PATCH /cart/:id`: Atualiza a quantidade de um produto no carrinho.
+     - `POST /cart/checkout/:id`: Finaliza o carrinho.
+
+3. **Como testar**:
+   - Clique na rota desejada.
+   - Preencha os parâmetros necessários (ex.: `id`, `body`).
+   - Clique em "Execute" para enviar a requisição.
+   - Veja a resposta diretamente na interface do Swagger.
+
+4. **Exemplo de teste**:
+   - Para criar um produto:
+     - Selecione `POST /products`.
+     - Clique em "Try it out".
+     - Preencha o corpo da requisição:
+       ```json
+       {
+         "name": "Camisa",
+         "price": 100,
+         "description": "Camisa de algodão",
+         "discount": 10,
+         "photos": ["http://example.com/photo1.jpg"]
+       }
+       ```
+     - Clique em "Execute".
+     - Veja a resposta com o produto criado.
+
+---
 ## Rotas e Exemplos
 
 ### **Produtos**

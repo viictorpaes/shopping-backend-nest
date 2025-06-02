@@ -1,38 +1,20 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UsePipes, ValidationPipe, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
+import { FindByCriteriaDto } from './product.dto';
+import { ProductSwagger } from './product.swagger';
 
-class FindByCriteriaDto {
-  name?: string;
-  priceGte?: number;
-  priceLte?: number;
-  description?: string;
-}
-
-@ApiTags('Products') // Define a tag para o grupo de rotas
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os produtos ou buscar por critérios' })
-  @ApiQuery({ name: 'name', required: false, type: String, description: 'Nome do produto' })
-  @ApiQuery({ name: 'priceGte', required: false, type: Number, description: 'Preço maior ou igual' })
-  @ApiQuery({ name: 'priceLte', required: false, type: Number, description: 'Preço menor ou igual' })
-  @ApiQuery({ name: 'description', required: false, type: String, description: 'Descrição do produto' })
-  @ApiResponse({ status: 200, description: 'Produtos encontrados com sucesso.' })
+  @ProductSwagger.findAll()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async findAll(@Query() query: FindByCriteriaDto): Promise<Product[]> {
     try {
       if (query && Object.keys(query).length > 0) {
-        const validKeys = ['name', 'priceGte', 'priceLte', 'description'];
-        const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
-        if (invalidKeys.length > 0) {
-          throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);
-        }
-
         const products = await this.productService.findByCriteria(query);
         if (products.length === 0) {
           throw new NotFoundException('No products found matching the criteria');
@@ -47,10 +29,7 @@ export class ProductController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Buscar um produto pelo ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
-  @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'ID do produto inválido.' })
+  @ProductSwagger.findOne()
   async findOne(@Param('id') id: number): Promise<Product | null> {
     try {
       if (id <= 0) {
@@ -63,8 +42,7 @@ export class ProductController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Criar um novo produto' })
-  @ApiResponse({ status: 201, description: 'Produto criado com sucesso.' })
+  @ProductSwagger.create()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     try {
@@ -75,9 +53,7 @@ export class ProductController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Atualizar um produto pelo ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
-  @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso.' })
+  @ProductSwagger.update()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto): Promise<Product> {
     try {
@@ -88,9 +64,7 @@ export class ProductController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remover um produto pelo ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
-  @ApiResponse({ status: 200, description: 'Produto removido com sucesso.' })
+  @ProductSwagger.remove()
   async remove(@Param('id') id: number): Promise<void> {
     try {
       await this.productService.remove(id);

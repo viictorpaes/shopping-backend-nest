@@ -1,31 +1,8 @@
 import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UsePipes, ValidationPipe, InternalServerErrorException, Logger, ParseIntPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
-import { IsArray, ValidateNested, IsNotEmpty, IsPositive } from 'class-validator';
-import { Type } from 'class-transformer';
-
-class AddProductDto {
-  @IsNotEmpty()
-  @IsPositive()
-  id: number; // Certifique-se de usar id
-
-  @IsNotEmpty()
-  @IsPositive()
-  quantity: number;
-}
-
-class AddProductsDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AddProductDto)
-  products: AddProductDto[];
-}
-
-class UpdateCartQuantityDto {
-  @IsNotEmpty()
-  @IsPositive()
-  quantity: number;
-}
+import { CartSwagger } from './cart.swagger';
+import { AddProductsDto, UpdateCartQuantityDto, RemoveProductDto } from './cart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -34,19 +11,17 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
+  @CartSwagger.findAll()
   findAll(): Promise<Cart[]> {
     return this.cartService.findAll();
   }
 
   @Post()
+  @CartSwagger.addProducts()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async addProducts(@Body() body: AddProductsDto): Promise<Cart[]> {
     try {
-      const formattedProducts = body.products.map(product => ({
-        productId: product.id, // Map id to productId
-        quantity: product.quantity,
-      }));
-      return await this.cartService.addProducts(formattedProducts);
+      return await this.cartService.addProducts(body.products);
     } catch (error) {
       this.logger.error('Error adding products to cart', error.stack);
       throw new InternalServerErrorException('An error occurred while adding products to the cart');
@@ -54,12 +29,14 @@ export class CartController {
   }
 
   @Delete(':id')
+  @CartSwagger.removeProduct()
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async removeProduct(
     @Param('id', ParseIntPipe) id: number,
-    @Query('productId', ParseIntPipe) productId: number,
+    @Query() query: RemoveProductDto,
   ): Promise<void> {
     try {
-      const exists = await this.cartService.findCartItem(id, productId);
+      const exists = await this.cartService.findCartItem(id, query.productId);
       if (!exists) {
         throw new InternalServerErrorException('Cart item not found');
       }
@@ -70,6 +47,7 @@ export class CartController {
   }
 
   @Patch(':id')
+  @CartSwagger.updateQuantity()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async updateQuantity(
     @Param('id', ParseIntPipe) id: number,
@@ -85,6 +63,7 @@ export class CartController {
   }
 
   @Post('checkout/:id')
+  @CartSwagger.checkout()
   async checkout(@Param('id', ParseIntPipe) id: number): Promise<void> {
     try {
       await this.cartService.checkout(id);

@@ -40,7 +40,7 @@ export class CartController {
       }));
       return await this.cartService.addProducts(formattedProducts);
     } catch (error) {
-      throw new InternalServerErrorException('Error adding products to cart');
+      throw new InternalServerErrorException('An error occurred');
     }
   }
 
@@ -49,7 +49,7 @@ export class CartController {
     try {
       await this.cartService.removeProduct(id);
     } catch (error) {
-      throw new InternalServerErrorException('Error removing product from cart');
+      throw new InternalServerErrorException('An error occurred');
     }
   }
 
@@ -58,7 +58,7 @@ export class CartController {
     try {
       await this.cartService.checkout();
     } catch (error) {
-      throw new InternalServerErrorException('Error during checkout');
+      throw new InternalServerErrorException('An error occurred');
     }
   }
 }

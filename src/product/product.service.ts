@@ -20,7 +20,7 @@ export class ProductService {
   async findOne(id: number): Promise<Product | null> {
     const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new NotFoundException(`Product with id ${id} not found`);
+      throw new NotFoundException('Product not found');
     }
     return product;
   }
@@ -34,7 +34,7 @@ export class ProductService {
     await this.productRepository.update(id, productData);
     const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new Error(`Product with id ${id} not found`);
+      throw new NotFoundException('Product not found');
     }
     return product;
   }
@@ -42,7 +42,7 @@ export class ProductService {
   async remove(id: number): Promise<void> {
     const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new Error(`Product with id ${id} not found`);
+      throw new NotFoundException('Product not found');
     }
 
     await this.cartRepository.delete({ product: { id } });
@@ -55,7 +55,7 @@ export class ProductService {
     if (criteria.id) {
       const id = parseInt(criteria.id as any, 10);
       if (isNaN(id) || id <= 0) {
-        throw new BadRequestException('Invalid id. It must be a positive number.');
+        throw new BadRequestException('Invalid search criteria');
       }
       where.id = id;
     }
@@ -65,7 +65,7 @@ export class ProductService {
     if (criteria.price) {
       const price = parseFloat(criteria.price as any);
       if (isNaN(price) || price <= 0) {
-        throw new BadRequestException('Invalid price. It must be a positive number.');
+        throw new BadRequestException('Invalid search criteria');
       }
       where.price = price;
     }

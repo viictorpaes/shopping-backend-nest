@@ -24,7 +24,7 @@ export class ProductController {
     try {
       const parsedId = parseInt(id, 10);
       if (isNaN(parsedId) || parsedId <= 0) {
-        throw new BadRequestException('Invalid id. It must be a positive number.');
+        throw new BadRequestException('Invalid ID');
       }
       return await this.productService.findOne(parsedId);
     } catch (error) {
@@ -79,13 +79,13 @@ export class ProductController {
   async findByCriteria(@Query() query: Partial<Product>): Promise<Product[]> {
     try {
       if (!query || Object.keys(query).length === 0) {
-        throw new BadRequestException('At least one search criterion must be provided');
+        throw new BadRequestException('Invalid search criteria');
       }
 
       const validKeys = ['id', 'name', 'price', 'description'];
       const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
       if (invalidKeys.length > 0) {
-        throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);
+        throw new BadRequestException('Invalid search criteria');
       }
 
       return await this.productService.findByCriteria(query);

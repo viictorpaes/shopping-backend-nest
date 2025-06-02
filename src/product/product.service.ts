@@ -36,7 +36,12 @@ export class ProductService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    return product;
+
+    const updatedProduct = await this.productRepository.findOneBy({ id });
+    if (!updatedProduct) {
+      throw new NotFoundException('Product not found after update');
+    }
+    return updatedProduct;
   }
 
   async remove(id: number): Promise<void> {

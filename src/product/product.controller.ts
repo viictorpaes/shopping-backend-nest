@@ -20,13 +20,12 @@ export class ProductController {
   @ApiParam({ name: 'id', type: Number, description: 'ID do produto' })
   @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
   @ApiResponse({ status: 400, description: 'ID do produto inválido.' })
-  async findOne(@Param('id') id: string): Promise<Product | null> {
+  async findOne(@Param('id') id: number): Promise<Product | null> {
     try {
-      const parsedId = parseInt(id, 10);
-      if (isNaN(parsedId) || parsedId <= 0) {
+      if (id <= 0) {
         throw new BadRequestException('Invalid ID');
       }
-      return await this.productService.findOne(parsedId);
+      return await this.productService.findOne(id);
     } catch (error) {
       throw new InternalServerErrorException('Error fetching product');
     }

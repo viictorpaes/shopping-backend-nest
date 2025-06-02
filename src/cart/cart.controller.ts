@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException, ParseIntPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
 import { IsArray, ValidateNested, IsNotEmpty, IsPositive } from 'class-validator';
@@ -45,7 +45,7 @@ export class CartController {
   }
 
   @Delete(':id')
-  async removeProduct(@Param('id') id: number): Promise<void> {
+  async removeProduct(@Param('id', ParseIntPipe) id: number): Promise<void> {
     try {
       await this.cartService.removeProduct(id);
     } catch (error) {

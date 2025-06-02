@@ -6,7 +6,8 @@ import { CreateProductDto, UpdateProductDto } from './product.dto';
 
 class FindByCriteriaDto {
   name?: string;
-  price?: number;
+  priceGte?: number;
+  priceLte?: number;
   description?: string;
 }
 
@@ -18,14 +19,15 @@ export class ProductController {
   @Get()
   @ApiOperation({ summary: 'Listar todos os produtos ou buscar por critérios' })
   @ApiQuery({ name: 'name', required: false, type: String, description: 'Nome do produto' })
-  @ApiQuery({ name: 'price', required: false, type: Number, description: 'Preço do produto' })
+  @ApiQuery({ name: 'priceGte', required: false, type: Number, description: 'Preço maior ou igual' })
+  @ApiQuery({ name: 'priceLte', required: false, type: Number, description: 'Preço menor ou igual' })
   @ApiQuery({ name: 'description', required: false, type: String, description: 'Descrição do produto' })
   @ApiResponse({ status: 200, description: 'Produtos encontrados com sucesso.' })
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async findAll(@Query() query: FindByCriteriaDto): Promise<Product[]> {
     try {
       if (query && Object.keys(query).length > 0) {
-        const validKeys = ['name', 'price', 'description'];
+        const validKeys = ['name', 'priceGte', 'priceLte', 'description'];
         const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
         if (invalidKeys.length > 0) {
           throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere, Like } from 'typeorm';
+import { Repository, FindOptionsWhere, Like, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
 import { Cart } from '../cart/cart.entity';
 
@@ -49,24 +49,22 @@ export class ProductService {
     await this.productRepository.delete(id);
   }
 
-  findByCriteria(criteria: Partial<Product>): Promise<Product[]> {
+  findByCriteria(criteria: Partial<Product> & { priceGte?: number; priceLte?: number }): Promise<Product[]> {
     const where: FindOptionsWhere<Product> = {};
 
-    
     if (criteria.name) {
       where.name = Like(`%${criteria.name}%`);
     }
-    if (criteria.price) {
-      const price = parseFloat(criteria.price as any);
-      if (isNaN(price) || price <= 0) {
-        throw new BadRequestException('Invalid search criteria');
-      }
-      where.price = price;
+    if (criteria.priceGte) {
+      where.price = MoreThanOrEqual(criteria.priceGte); // Preço maior ou igual
+    }
+    if (criteria.priceLte) {
+      where.price = LessThanOrEqual(criteria.priceLte); // Preço menor ou igual
     }
     if (criteria.description) {
-      where.description = Like(`%${criteria.description}%`);
     }
 
     return this.productRepository.find({ where });
   }
 }
+

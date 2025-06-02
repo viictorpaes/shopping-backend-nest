@@ -38,7 +38,12 @@ export class FindByCriteriaDto {
   @IsOptional()
   @IsNumber()
   @IsPositive()
-  price?: number;
+  priceGte?: number; // Preço maior ou igual
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  priceLte?: number; // Preço menor ou igual
 
   @IsOptional()
   @IsString()

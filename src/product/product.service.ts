@@ -36,12 +36,7 @@ export class ProductService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-
-    const updatedProduct = await this.productRepository.findOneBy({ id });
-    if (!updatedProduct) {
-      throw new NotFoundException('Product not found after update');
-    }
-    return updatedProduct;
+    return product;
   }
 
   async remove(id: number): Promise<void> {
@@ -50,7 +45,7 @@ export class ProductService {
       throw new NotFoundException('Product not found');
     }
 
-    await this.cartRepository.delete({ product: { id } });
+    // Apenas remove o produto, ON DELETE CASCADE cuidará dos itens relacionados no carrinho
     await this.productRepository.delete(id);
   }
 

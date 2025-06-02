@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, BadRequestException, UsePipes, ValidationPipe, InternalServerErrorException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UsePipes, ValidationPipe, InternalServerErrorException, Logger, ParseIntPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
 import { IsArray, ValidateNested, IsNotEmpty, IsPositive } from 'class-validator';
@@ -7,7 +7,7 @@ import { Type } from 'class-transformer';
 class AddProductDto {
   @IsNotEmpty()
   @IsPositive()
-  productId: number;
+  id: number; // Certifique-se de usar id
 
   @IsNotEmpty()
   @IsPositive()
@@ -23,6 +23,8 @@ class AddProductsDto {
 
 @Controller('cart')
 export class CartController {
+  private readonly logger = new Logger(CartController.name);
+
   constructor(private readonly cartService: CartService) {}
 
   @Get()
@@ -35,12 +37,13 @@ export class CartController {
   async addProducts(@Body() body: AddProductsDto): Promise<Cart[]> {
     try {
       const formattedProducts = body.products.map(product => ({
-        productId: product.productId,
+        productId: product.id, // Map id to productId
         quantity: product.quantity,
       }));
       return await this.cartService.addProducts(formattedProducts);
     } catch (error) {
-      throw new InternalServerErrorException('An error occurred');
+      this.logger.error('Error adding products to cart', error.stack);
+      throw new InternalServerErrorException('An error occurred while adding products to the cart');
     }
   }
 

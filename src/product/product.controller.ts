@@ -9,10 +9,26 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os produtos' })
-  @ApiResponse({ status: 200, description: 'Lista de produtos retornada com sucesso.' })
-  findAll(): Promise<Product[]> {
-    return this.productService.findAll();
+  @ApiOperation({ summary: 'Listar todos os produtos ou buscar por critérios' })
+  @ApiQuery({ name: 'id', required: false, type: Number, description: 'ID do produto' })
+  @ApiQuery({ name: 'name', required: false, type: String, description: 'Nome do produto' })
+  @ApiQuery({ name: 'price', required: false, type: Number, description: 'Preço do produto' })
+  @ApiQuery({ name: 'description', required: false, type: String, description: 'Descrição do produto' })
+  @ApiResponse({ status: 200, description: 'Produtos encontrados com sucesso.' })
+  async findAll(@Query() query: Partial<Product>): Promise<Product[]> {
+    try {
+      if (query && Object.keys(query).length > 0) {
+        const validKeys = ['id', 'name', 'price', 'description'];
+        const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
+        if (invalidKeys.length > 0) {
+          throw new BadRequestException(`Invalid query parameters: ${invalidKeys.join(', ')}`);
+        }
+        return await this.productService.findByCriteria(query);
+      }
+      return await this.productService.findAll();
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching products');
+    }
   }
 
   @Get(':id')
@@ -65,31 +81,6 @@ export class ProductController {
       await this.productService.remove(id);
     } catch (error) {
       throw new InternalServerErrorException('Error deleting product');
-    }
-  }
-
-  @Get('search')
-  @ApiOperation({ summary: 'Buscar produtos por critérios' })
-  @ApiQuery({ name: 'id', required: false, type: Number, description: 'ID do produto' })
-  @ApiQuery({ name: 'name', required: false, type: String, description: 'Nome do produto' })
-  @ApiQuery({ name: 'price', required: false, type: Number, description: 'Preço do produto' })
-  @ApiQuery({ name: 'description', required: false, type: String, description: 'Descrição do produto' })
-  @ApiResponse({ status: 200, description: 'Produtos encontrados com sucesso.' })
-  async findByCriteria(@Query() query: Partial<Product>): Promise<Product[]> {
-    try {
-      if (!query || Object.keys(query).length === 0) {
-        throw new BadRequestException('Invalid search criteria');
-      }
-
-      const validKeys = ['id', 'name', 'price', 'description'];
-      const invalidKeys = Object.keys(query).filter(key => !validKeys.includes(key));
-      if (invalidKeys.length > 0) {
-        throw new BadRequestException('Invalid search criteria');
-      }
-
-      return await this.productService.findByCriteria(query);
-    } catch (error) {
-      throw new InternalServerErrorException('Error searching products');
     }
   }
 }

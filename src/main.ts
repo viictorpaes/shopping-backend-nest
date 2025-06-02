@@ -18,6 +18,6 @@ async function bootstrap() {
   // Adiciona o filtro global de exceções
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(process.env.PORT || 3000); // Usa a variável PORT
+  await app.listen(process.env.PORT || 3000); // Usa a variável PORT ou 3000 como padrão
 }
 bootstrap();

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cart } from './cart.entity';
@@ -6,6 +6,8 @@ import { Product } from '../product/product.entity';
 
 @Injectable()
 export class CartService {
+  private readonly logger = new Logger(CartService.name);
+
   constructor(
     @InjectRepository(Cart)
     private readonly cartRepository: Repository<Cart>,
@@ -21,13 +23,18 @@ export class CartService {
     const cartItems: Cart[] = [];
 
     for (const { productId, quantity } of products) {
-      const product = await this.productRepository.findOne({ where: { id: productId } });
-      if (!product) {
-        throw new NotFoundException('Product not found');
-      }
+      try {
+        const product = await this.productRepository.findOne({ where: { id: productId } });
+        if (!product) {
+          throw new NotFoundException('Product not found');
+        }
 
-      const cartItem = this.cartRepository.create({ product, quantity });
-      cartItems.push(await this.cartRepository.save(cartItem));
+        const cartItem = this.cartRepository.create({ product, quantity });
+        cartItems.push(await this.cartRepository.save(cartItem));
+      } catch (error) {
+        this.logger.error(`Error adding product with ID ${productId} to cart`, error.stack);
+        throw new Error('An error occurred while adding products to the cart');
+      }
     }
 
     return cartItems;

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UsePipes, ValidationPipe, InternalServerErrorException, Logger, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UsePipes, ValidationPipe, Logger, ParseIntPipe, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
 import { CartSwagger } from './cart.swagger';
@@ -12,8 +12,13 @@ export class CartController {
 
   @Get()
   @CartSwagger.findAll()
-  findAll(): Promise<Cart[]> {
-    return this.cartService.findAll();
+  async findAll(): Promise<Cart[]> {
+    try {
+      return await this.cartService.findAll();
+    } catch (error) {
+      this.logger.error('Error fetching cart items', error.stack);
+      throw new BadRequestException('An error occurred while fetching cart items');
+    }
   }
 
   @Post()
@@ -24,7 +29,7 @@ export class CartController {
       return await this.cartService.addProducts(body.products);
     } catch (error) {
       this.logger.error('Error adding products to cart', error.stack);
-      throw new InternalServerErrorException('An error occurred while adding products to the cart');
+      throw new BadRequestException('An error occurred while adding products to the cart');
     }
   }
 
@@ -38,11 +43,12 @@ export class CartController {
     try {
       const exists = await this.cartService.findCartItem(id, query.productId);
       if (!exists) {
-        throw new InternalServerErrorException('Cart item not found');
+        throw new NotFoundException('Cart item not found');
       }
       await this.cartService.removeProduct(id);
     } catch (error) {
-      throw new InternalServerErrorException('An error occurred');
+      this.logger.error('Error removing product from cart', error.stack);
+      throw new BadRequestException('An error occurred while removing product from the cart');
     }
   }
 
@@ -58,7 +64,7 @@ export class CartController {
       return await this.cartService.updateQuantity(id, productId, updateCartQuantityDto.quantity);
     } catch (error) {
       this.logger.error('Error updating cart item quantity', error.stack);
-      throw new InternalServerErrorException('An error occurred while updating cart item quantity');
+      throw new BadRequestException('An error occurred while updating cart item quantity');
     }
   }
 
@@ -68,7 +74,8 @@ export class CartController {
     try {
       await this.cartService.checkout(id);
     } catch (error) {
-      throw new InternalServerErrorException('An error occurred during checkout');
+      this.logger.error('Error during checkout', error.stack);
+      throw new BadRequestException('An error occurred during checkout');
     }
   }
 }
